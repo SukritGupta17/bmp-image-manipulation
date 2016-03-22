@@ -1,0 +1,13 @@
+Usage: bmpedit [OPTIONS...] [input.bmp]
+
+DESCRIPTION:
+	This program does simple edits of BMP image files. When the program runs it first prints
+	out the width and height of the input image within the BMP file. Once this is done if
+	there is a filter(or sequence of filters) then they are applied to the image. The 
+	resulting image is also stored using BMP format into a output file. Without any filters
+	the width and height of the image is outputed.
+
+OPTIONS:
+	-o FILE		Sets the output file for modified images (default output file is "out.bmp")
+	-t 0.0-1.0	Apply a threshold filter to the image with a threshold: the value given.
+	-h		Displays this usage message.
