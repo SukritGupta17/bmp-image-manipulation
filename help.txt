@@ -10,4 +10,10 @@ DESCRIPTION:
 OPTIONS:
 	-o FILE		Sets the output file for modified images (default output file is "out.bmp")
 	-t 0.0-1.0	Apply a threshold filter to the image with a threshold: the value given.
+	-b 0.0-1.0	Blend two images together; image 1 blends on top of image 2 depending on 
+			the blend value provided.
+			-Usage: bmpedit -b 0.0-1.0 image1.bmp image2.bmp
+	-b		if no blend value provided the images are blended evenly.
+			-Usage: bmpedit -b image1.bmp image2.bmp
+			(Output image produced will be "blendOut.bmp)"
 	-h		Displays this usage message.
