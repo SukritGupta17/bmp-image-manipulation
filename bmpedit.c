@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     }
 
   }
-  else if(argc > 3)
+  else if(argc >= 3)
   {
     // THRESHOLD MODULE INVOKED
     if(strcmp(argv[1],"-t") == 0)
@@ -97,6 +97,11 @@ int main(int argc, char *argv[]) {
       {
         op_file_n = argv[argc - 2];
       }
+      else if(argc == 4 || argc == 6)
+      {
+        op_file_n = "modified.bmp";
+      }
+
       else
       {
         error("wrong usage! use '-h' to find correct usage");
@@ -107,9 +112,16 @@ int main(int argc, char *argv[]) {
     else if(strcmp(argv[1],"-g") == 0)
     {
       flg = 4;
+      //with specified output file
       if(argc == 5 && (strcmp(argv[2],"-o") == 0))
       {
         op_file_n = argv[argc - 2];
+        imageload(ip_file_n,op_file_n,flg,mf,th);
+      }
+      //without specified output file
+      else if(argc == 3)
+      {
+        op_file_n = "greyscale.bmp";
         imageload(ip_file_n,op_file_n,flg,mf,th);
       }
 
