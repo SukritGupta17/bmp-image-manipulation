@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
   {
     error("no input found, use -h for usage help");
   }
-  if(argc == 2)
+  else if(argc == 2)
   {
     if (strcmp(argv[1],"-h") == 0)
     {
@@ -43,55 +43,87 @@ int main(int argc, char *argv[]) {
     }
 
   }
-  // if threshhold function invoked
-  if(strcmp(argv[1],"-t") == 0)
+  else if(argc > 3)
   {
-    flg = 1;
-    th[0] = atof(argv[2]);
-    //printf("threshold: %f\n",th );
-    // with specific output file
-    if(argc == 6 && (strcmp(argv[3],"-o") == 0))
+    // THRESHOLD MODULE INVOKED
+    if(strcmp(argv[1],"-t") == 0)
     {
-      op_file_n = argv[4];
-    }
-    imageload(ip_file_n,op_file_n,flg,mf,th);
-  }
-  else if(strcmp(argv[1],"-b") == 0)
-  {
-    if(argc == 5)
-    {
-      th[0] = atof(argv[2]);
-    }
-    flg = 2;
-    ip_file_n = argv[argc - 2];
-    op_file_n = argv[argc - 1];
+      //printf("threshold: %f\n",th );
 
-    imageload(ip_file_n,op_file_n,flg,mf,th);
+      if(argc == 4 || (argc == 6 && (strcmp(argv[3],"-o") == 0)))
+      {
+        //without specified output
+        flg = 1;
+        th[0] = atof(argv[2]);
+        // with specific output file
+        if(argc == 6 ) op_file_n = argv[4];
+        imageload(ip_file_n,op_file_n,flg,mf,th);
+      }
+      else
+      {
+        error("wrong usage for threshold! use '-h' to find correct usage");
+      }
+
+    }
+    // BLEND MODULE INVOKED
+    else if(strcmp(argv[1],"-b") == 0)
+    {
+      if(argc == 5)
+      {
+        th[0] = atof(argv[2]);
+      }
+      flg = 2;
+      ip_file_n = argv[argc - 2];
+      op_file_n = argv[argc - 1];
+
+      imageload(ip_file_n,op_file_n,flg,mf,th);
+    }
+    // BRIGHTNESS SATURATION HUE MODULE INVOKED
+    else if(strcmp(argv[1],"-br") == 0 || strcmp(argv[1],"-sa") == 0  || strcmp(argv[1],"-hu") == 0 || strcmp(argv[1],"-bsh") == 0)
+    {
+      flg = 3;
+      th[0] = atof(argv[2]);
+      if(strcmp(argv[1],"-sa") == 0) mf = 1;
+      else if(strcmp(argv[1],"-hu") == 0) mf = 2;
+      else if(strcmp(argv[1],"-bsh") == 0)
+      {
+        th[1] = atof(argv[3]);
+        th[2] = atof(argv[4]);
+        mf = 3;
+      }
+      //printf("threshold: %f\n",th );
+      // with specific output file
+      if((argc == 6 && (strcmp(argv[3],"-o") == 0)) || (argc == 8 && (strcmp(argv[5],"-o") == 0)))
+      {
+        op_file_n = argv[argc - 2];
+      }
+      else
+      {
+        error("wrong usage! use '-h' to find correct usage");
+      }
+      imageload(ip_file_n,op_file_n,flg,mf,th);
+    }
+    // GREYSCALE MODULE INVOKED
+    else if(strcmp(argv[1],"-g") == 0)
+    {
+      flg = 4;
+      if(argc == 5 && (strcmp(argv[2],"-o") == 0))
+      {
+        op_file_n = argv[argc - 2];
+        imageload(ip_file_n,op_file_n,flg,mf,th);
+      }
+
+      else
+      {
+        error("wrong usage for greyscale! use '-h' to find correct usage");
+      }
+    }
   }
-  else if(strcmp(argv[1],"-br") == 0 || strcmp(argv[1],"-sa") == 0  || strcmp(argv[1],"-hu") == 0 || strcmp(argv[1],"-bsh") == 0)
+  else
   {
-    flg = 3;
-    th[0] = atof(argv[2]);
-    if(strcmp(argv[1],"-sa") == 0) mf = 1;
-    else if(strcmp(argv[1],"-hu") == 0) mf = 2;
-    else if(strcmp(argv[1],"-bsh") == 0)
-    {
-      th[1] = atof(argv[3]);
-      th[2] = atof(argv[4]);
-      mf = 3;
-    }
-    //printf("threshold: %f\n",th );
-    // with specific output file
-    if((argc == 6 && (strcmp(argv[3],"-o") == 0)) || (argc == 8 && (strcmp(argv[5],"-o") == 0)))
-    {
-      op_file_n = argv[argc - 2];
-    }
-    else
-    {
-      error("wrong usage! use '-h' to find correct usage");
-    }
-    imageload(ip_file_n,op_file_n,flg,mf,th);
+    error("INVALID ARGUMENTS, use '-h' for help.");
   }
+
 
   //printf("%s", file_n );
 
@@ -128,7 +160,7 @@ void imageload(char *ip_filename, char *op_filename, int flag,int miniFlag, floa
   {
 
     //float threshold = 0.5;/printf("%s\n %3s\n","DESCRIPTION:","This program does simple input" );
-    printf("%f\n",threshold[0]);
+    //printf("%f\n",threshold[0]);
     // data for destination file
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
@@ -160,8 +192,6 @@ void imageload(char *ip_filename, char *op_filename, int flag,int miniFlag, floa
   }
   //---------------------------------------------------------------------
   // IMAGE BLEND module
-  jfkbvlaifbvalisfvbjaliubvalierb
-
   else if(flag == 2)
   {
     float blend_threshold = threshold[0];
@@ -369,6 +399,30 @@ void imageload(char *ip_filename, char *op_filename, int flag,int miniFlag, floa
 
     }
 
+
+  }
+  //-----------------------------------------------------------------------
+  // GREYSCALE MODULE
+  else if(flag == 4)
+  {
+    dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
+    ftruncate(dest_fd, filesize);
+    dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
+    // copy file
+    memcpy(dest_data, source_data, filesize);
+    for(int i = 54; i < (3 * height * Width); i += 3 )
+    {
+      float pixel = 0;
+      pixel =(dest_data[i]+dest_data[i+1]+dest_data[i+2])/3;
+
+      dest_data[i] = pixel;
+      dest_data[i+1] = pixel;
+      dest_data[i+2] = pixel;
+    }
+    // delete memory map data
+    munmap(dest_data, filesize);
+    // close files
+    close(dest_fd);
 
   }
 // delete memory map data
