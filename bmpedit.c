@@ -96,17 +96,20 @@ int main(int argc, char *argv[]) {
       if((argc == 6 && (strcmp(argv[3],"-o") == 0)) || (argc == 8 && (strcmp(argv[5],"-o") == 0)))
       {
         op_file_n = argv[argc - 2];
+        imageload(ip_file_n,op_file_n,flg,mf,th);
       }
       else if(argc == 4 || argc == 6)
       {
+        printf("%s\n","im here" );
         op_file_n = "modified.bmp";
+        imageload(ip_file_n,op_file_n,flg,mf,th);
       }
 
       else
       {
         error("wrong usage! use '-h' to find correct usage");
       }
-      imageload(ip_file_n,op_file_n,flg,mf,th);
+
     }
     // GREYSCALE MODULE INVOKED
     else if(strcmp(argv[1],"-g") == 0)
