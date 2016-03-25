@@ -11,7 +11,7 @@
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
-// method prototypes
+// function prototypes
 void imageload(char *ip_filename, char *op_filename,int flag,float threshold[5]);
 void help();
 void error(char str[]);
