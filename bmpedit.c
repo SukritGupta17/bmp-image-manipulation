@@ -1,20 +1,37 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
 // method prototypes
-void imageload(char *ip_filename, char *op_filename,int flag,int miniFlag,float threshold[5]);
+void imageload(char *ip_filename, char *op_filename,int flag,float threshold[5]);
 void help();
 void error(char str[]) {
    printf ("Error : %s\n",str);
    exit(1);
+}
+bool isNumber(char number[])
+{
+    int i = 0;
+
+    //checking for negative numbers
+    if (number[0] == '-')
+        i = 1;
+    for (; number[i] != 0; i++)
+    {
+        //if (number[i] > '9' || number[i] < '0')
+        if (!isdigit(number[i]))
+            return false;
+    }
+    return true;
 }
 //---------------------------------------------------------------
 
@@ -22,9 +39,9 @@ int main(int argc, char *argv[]) {
   char *ip_file_n = argv[argc -1];
   char *op_file_n = "out.bmp";
   int flg = 0;
-  int mf = 0;
   float th[5]  = {-1.0,0,0,0,0};
   //printf("%d\n", argc);
+
   if(argc == 1)
   {
     error("no input found, use -h for usage help");
@@ -33,17 +50,16 @@ int main(int argc, char *argv[]) {
   {
     if (strcmp(argv[1],"-h") == 0)
     {
-      //ip_file_n =
       help();
     }
     else
     {
       //ip_file_n = argv[1];
-      imageload(ip_file_n,op_file_n,flg,mf,th);
+      imageload(ip_file_n,op_file_n,flg,th);
     }
 
   }
-  else if(argc > 3)
+  else if(argc >= 3 && argc < 9)
   {
     // THRESHOLD MODULE INVOKED
     if(strcmp(argv[1],"-t") == 0)
@@ -57,7 +73,7 @@ int main(int argc, char *argv[]) {
         th[0] = atof(argv[2]);
         // with specific output file
         if(argc == 6 ) op_file_n = argv[4];
-        imageload(ip_file_n,op_file_n,flg,mf,th);
+        imageload(ip_file_n,op_file_n,flg,th);
       }
       else
       {
@@ -76,27 +92,39 @@ int main(int argc, char *argv[]) {
       ip_file_n = argv[argc - 2];
       op_file_n = argv[argc - 1];
 
-      imageload(ip_file_n,op_file_n,flg,mf,th);
+      imageload(ip_file_n,op_file_n,flg,th);
     }
     // BRIGHTNESS SATURATION HUE MODULE INVOKED
-    else if(strcmp(argv[1],"-br") == 0 || strcmp(argv[1],"-sa") == 0  || strcmp(argv[1],"-hu") == 0 || strcmp(argv[1],"-bsh") == 0)
+    else if(strcmp(argv[1],"-bsh") == 0)
     {
       flg = 3;
-      th[0] = atof(argv[2]);
-      if(strcmp(argv[1],"-sa") == 0) mf = 1;
-      else if(strcmp(argv[1],"-hu") == 0) mf = 2;
-      else if(strcmp(argv[1],"-bsh") == 0)
+      if(argc == 6)
       {
-        th[1] = atof(argv[3]);
-        th[2] = atof(argv[4]);
-        mf = 3;
+        op_file_n = "modified.bmp";
+        if(isNumber(argv[2]) && isNumber(argv[3]) && isNumber(argv[4]))
+        {
+          //printf("%s\n", "pass");
+          th[0]= atof(argv[2]);
+          th[1] = atof(argv[3]);
+          th[2] = atof(argv[4]);
+        }
+        else error("Wrong values passed,use '-h' to find correct usage ");
+        imageload(ip_file_n,op_file_n,flg,th);
       }
       //printf("threshold: %f\n",th );
       // with specific output file
-      if((argc == 6 && (strcmp(argv[3],"-o") == 0)) || (argc == 8 && (strcmp(argv[5],"-o") == 0)))
+      else if((argc == 8 && (strcmp(argv[5],"-o") == 0)))
       {
+        if(isNumber(argv[2]) && isNumber(argv[3]) && isNumber(argv[4]))
+        {
+          //printf("%s\n", "pass");
+          th[0]= atof(argv[2]);
+          th[1] = atof(argv[3]);
+          th[2] = atof(argv[4]);
+        }
+        else error("Wrong values passed,use '-h' to find correct usage ");
         op_file_n = argv[argc - 2];
-        imageload(ip_file_n,op_file_n,flg,mf,th);
+        imageload(ip_file_n,op_file_n,flg,th);
       }
       else
       {
@@ -108,16 +136,27 @@ int main(int argc, char *argv[]) {
     else if(strcmp(argv[1],"-g") == 0)
     {
       flg = 4;
+      //with specified output file
       if(argc == 5 && (strcmp(argv[2],"-o") == 0))
       {
         op_file_n = argv[argc - 2];
-        imageload(ip_file_n,op_file_n,flg,mf,th);
+        imageload(ip_file_n,op_file_n,flg,th);
+      }
+      //without specified output file
+      else if(argc == 3)
+      {
+        op_file_n = "greyscale.bmp";
+        imageload(ip_file_n,op_file_n,flg,th);
       }
 
       else
       {
         error("wrong usage for greyscale! use '-h' to find correct usage");
       }
+    }
+    else
+    {
+      error("INVALID ARGUMENTS, use '-h' for help.");
     }
   }
   else
@@ -131,7 +170,7 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void imageload(char *ip_filename, char *op_filename, int flag,int miniFlag, float threshold[5])
+void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5])
 {
   int source_fd,source_fd2, dest_fd;
   unsigned char *source_data,*source_data2, *dest_data;
@@ -292,45 +331,40 @@ void imageload(char *ip_filename, char *op_filename, int flag,int miniFlag, floa
          printf("Old values:\nhue:%.1f deg saturation:%.0f%% brightness:%.0f%%\n",hue,(saturation*100),(brightness*100) );
 
        }
-       if(miniFlag == 0 || miniFlag == 3)
-       {
-         brightness = brightness + (threshold[0]/100);
 
-         if(brightness>1.0)
-         {
-           brightness = 1.0;
-         }
-         else if(brightness<0.0)
-         {
-           brightness = 0.0;
-         }
-       }
-       if(miniFlag == 1 || miniFlag == 3)
+       brightness = brightness + (threshold[0]/100);
+
+       if(brightness>1.0)
        {
-         if(miniFlag == 1) saturation = saturation + (threshold[0]/100);
-         else if(miniFlag == 3) saturation = saturation + (threshold[1]/100);
-         if(saturation>1.0)
-         {
-           saturation = 1.0;
-         }
-         else if(saturation<0.0)
-         {
-           saturation = 0.0;
-         }
+         brightness = 1.0;
        }
-       if(miniFlag == 2 || miniFlag == 3)
+       else if(brightness<0.0)
        {
-         if(miniFlag == 2) hue = hue + threshold[0];
-         else if(miniFlag == 3) hue = hue + threshold[2];
-         if(hue>360)
-         {
-           hue = 360;
-         }
-         else if(hue<0)
-         {
-           hue = 0;
-         }
+         brightness = 0.0;
        }
+
+
+       saturation = saturation + (threshold[1]/100);
+       if(saturation>1.0)
+       {
+         saturation = 1.0;
+       }
+       else if(saturation<0.0)
+       {
+         saturation = 0.0;
+       }
+
+
+       hue = hue + threshold[2];
+       if(hue>360)
+       {
+         hue = 360;
+       }
+       else if(hue<0)
+       {
+         hue = 0;
+       }
+
 
 
 
