@@ -14,25 +14,9 @@
 // method prototypes
 void imageload(char *ip_filename, char *op_filename,int flag,float threshold[5]);
 void help();
-void error(char str[]) {
-   printf ("Error : %s\n",str);
-   exit(1);
-}
-bool isNumber(char number[])
-{
-    int i = 0;
+void error(char str[]);
+bool isNumber(char number[]);
 
-    //checking for negative numbers
-    if (number[0] == '-')
-        i = 1;
-    for (; number[i] != 0; i++)
-    {
-        //if (number[i] > '9' || number[i] < '0')
-        if (!isdigit(number[i]))
-            return false;
-    }
-    return true;
-}
 //---------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
@@ -131,7 +115,7 @@ int main(int argc, char *argv[]) {
       {
         printf("%s\n","im here" );
         op_file_n = "modified.bmp";
-        imageload(ip_file_n,op_file_n,flg,mf,th);
+        imageload(ip_file_n,op_file_n,flg,th);
       }
 
       else
@@ -160,7 +144,7 @@ int main(int argc, char *argv[]) {
       else if(argc == 3)
       {
         op_file_n = "greyscale.bmp";
-        imageload(ip_file_n,op_file_n,flg,mf,th);
+        imageload(ip_file_n,op_file_n,flg,th);
       }
 
       else
@@ -480,6 +464,7 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
 // close files
   close(source_fd);
  }
+ //--------------------------------------------------
 /*
 * Help module starts here
 */
@@ -497,6 +482,32 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
         }
         fclose(file);
     }
- }
+  }
+  /*
+  * error check module starts here
+  */
+  void error(char str[])
+  {
+     printf ("Error : %s\n",str);
+     exit(1);
+  }
+  /*
+  * argument check module starts here
+  */
+  bool isNumber(char number[])
+  {
+      int i = 0;
+
+      //checking for negative numbers
+      if (number[0] == '-')
+          i = 1;
+      for (; number[i] != 0; i++)
+      {
+          //if (number[i] > '9' || number[i] < '0')
+          if (!isdigit(number[i]))
+              return false;
+      }
+      return true;
+  }
 
  /* ----------------------------------------------------------------------*/
