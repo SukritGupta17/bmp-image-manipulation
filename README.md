@@ -54,9 +54,9 @@
     ` (float)(adding the three bytes of a pixel) / (255*3)`
     this gave a value that can be compared with threshold value passed and each pixel is manipulated accordingly, pixel       higher than threshold value is turned white and pixel lower than threshold value is turned black.
     ##### Sample output:
-
-
-
+    ![threshold output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/threshold.png)
+    ##### Sample output for images with padding:
+    ![threshold padding output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/thr_pad.png)
 
 * #### Picture Blend Feature
     When the following command is executed :
@@ -73,7 +73,7 @@
     If the blend coefficient is passed, the process used for blending is to take the input image2 as the background image     and the input image1 is blended on top of it depending on the amount of blend coefficient passed. This is done by        converting the value of a pixel into a floating point between 0.0 - 1.0 and compared with the blend coefficient.
     If no blend coefficient is passed both the images are blended in 50 - 50. This process is carried out by averaging       the pixels from both the images and using that average as the value for the output image file pixel `out_pixel =         (ip1_pixel + ip2_pixel) / 2;`. This technique results in a evenly blended image. The output image file name is fixed     to "BlendOut.bmp".
      ##### Sample output:
-
+    ![Blend Output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/blend.png)
 
 
 * #### Adjusting "Brightness" "Saturation" "Hue"
@@ -96,6 +96,7 @@
     It also prints out the old values of brightness, saturation and hue and the new values after the process is done for     one pixel in the image to provide the user with information of the modifications made to the values of the image.
 
     ##### Sample output:
+    ![bsh output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/bsh.png)
 
 * #### Grayscale Filter
     The following command invokes the grayscale filter on the input image.
@@ -110,7 +111,7 @@
     The "-g" flag invokes the grayscale filter in the program, it takes the input image provided in the command line         argument and maps the image data using the MMAP function as described above. The math for the grayscale to be            achieved is simple and the knowledge was acquired from wikipedia[8]. To achieve grayscale for any 24bit .bmp image       file you take the RGB value, add them together and divide them by 3, essentially getting the average value and set       that pixel to the value obtained. `pixel =(value for R + value for G + value for B)/3;` Repeating this process for        every pixel in the image will output a grayscale image.
 
     ##### Sample output:
-
+    ![grayscale output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/grayscale.png)
 * #### Invert Color Filter
     The following command invokes the invert color module on the input image.
     ```sh
@@ -127,6 +128,43 @@
             output_image_pixel[B] = 255 - input_image[B];
             ```
     ##### Sample output:
+    ![inverted image output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/a4f6ea996da03829de58beb7ec93205ab21a376a/invert.png)
+
+* #### Color Filter (Red,Green,Blue)
+    The following three commands are used to invoke this filter.
+
+    **FOR RED FILTER**
+     ```sh
+    $ ./bmpedit -cf r -o output_filename.bmp input_filename.bmp
+    ```
+    **OR**
+
+    ```sh
+    $ ./bmpedit -cf r input_filename.bmp
+    ```
+    **FOR GREEN FILTER**
+    ```sh
+    $ ./bmpedit -cf g -o output_filename.bmp input_filename.bmp
+    ```
+    **OR**
+
+    ```sh
+    $ ./bmpedit -cf g input_filename.bmp
+    ```
+    **FOR BLUE FILTER**
+    ```sh
+    $ ./bmpedit -cf b -o output_filename.bmp input_filename.bmp
+    ```
+    **OR**
+
+    ```sh
+    $ ./bmpedit -cf b input_filename.bmp
+    ```
+    The "-cf" flag invokes the color filter module and the filter wanted to be applied is taken as the next argument.
+    "r" for red, "g" for green and "b" for blue. The filter is applied using a simple formula, the filter passed by the      user say "b", the value of the B byte in the RGB pixel is kept unchanged and the other bytes are striped of their        values, so as to see only one color component.
+     ##### Sample output:
+     ![colorfilter output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/cab93c87ac74000e3cee17ab4a66f8fab632bd27/colorfilter.png)
+
 * #### Help Module
     The following command invokes the help for the bmpedit program:
     ```sh
@@ -147,6 +185,7 @@
 
 Each module was tested with different 24 bit .bmp images, various bugs were removed, many of the images used for testing are included in repository. Usage of printf statements at various places to check if the modules were being invoked aptly. printing out the image header to find the information required. printing out the image data bytes for the pixel array to check if the loops to manipulate pixels were going to the end of the file.
 To make the program robust: tested it with various wrong arguments i.e. passing a string where a number value is expected, images with varying dimensions (not modulo 4) and making the program able to handle padding in images.
+The program tests the image to check if it's a BMP image or other image format, throws an error if its not BMP.
 
 ## Optional Extensions (deserving of higher marks):
 
@@ -159,6 +198,9 @@ To make the program robust: tested it with various wrong arguments i.e. passing 
     - can be used to blend 2 images together
 - Invert Color Filter:
     - Inverts the colors of any 24bit *.bmp image.
+- RGB Color Filter :
+    - Changes images to single color component, chosen by the user during program execution.
+
 ## Limitations and Future Improvements:
 
 - Parsing command line arguments in a different order aren't handled.
@@ -186,15 +228,3 @@ McCreath
 - [6] Opensource Java Implementation: http://kickjava.com/src/org/eclipse/swt/graphics/RGB.java.htm
 - [7] Math formulas for conversion: http://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 - [8] GrayScale : https://en.wikipedia.org/wiki/Luma_%28video%29 , https://en.wikipedia.org/wiki/Grayscale
-
-
-
-
-
-
-
-
-
-
-
-    
