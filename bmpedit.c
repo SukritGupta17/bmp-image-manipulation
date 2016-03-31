@@ -252,7 +252,11 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
 
   source_data = mmap(NULL,filesize,PROT_READ,MAP_PRIVATE,source_fd,0);
   if(source_data == MAP_FAILED) error("mmap problem");
-
+  // check for image file format (throws error if not BMP)
+  if ((source_data[0]) != 66 || (source_data[1] != 77))
+  {
+    error("Wrong image file format, only takes 24bit .BMP images");
+  }
   // ------------------------------------------------------------------
   // converts image dimensions from binary to decimal
   int Width = source_data[18] | (source_data[19]<<8) |(source_data[20]<<16) | (source_data[21]<<24);
