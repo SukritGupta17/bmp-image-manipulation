@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+// Macros
 #define MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 
@@ -16,7 +17,6 @@ void imageload(char *ip_filename, char *op_filename,int flag,float threshold[5])
 void help();
 void error(char str[]);
 bool isNumber(char number[]);
-
 //---------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
@@ -24,7 +24,8 @@ int main(int argc, char *argv[]) {
   char *op_file_n = "out.bmp";
   int flg = 0;
   float th[5]  = {-1.0,0,0,0,0};
-  //printf("%d\n", argc);
+
+  // Check for arguments passed
 
   if(argc == 1)
   {
@@ -34,11 +35,12 @@ int main(int argc, char *argv[]) {
   {
     if (strcmp(argv[1],"-h") == 0)
     {
+      // HELP MODULE INVOKED
       help();
     }
     else
     {
-      //ip_file_n = argv[1];
+      // IMAGE DIMENSIONS INVOKED
       imageload(ip_file_n,op_file_n,flg,th);
     }
 
@@ -48,17 +50,22 @@ int main(int argc, char *argv[]) {
     // THRESHOLD MODULE INVOKED
     if(strcmp(argv[1],"-t") == 0)
     {
-      //printf("threshold: %f\n",th );
 
       if(argc == 4 || (argc == 6 && (strcmp(argv[3],"-o") == 0)))
       {
-        //without specified output
         flg = 1;
-        th[0] = atof(argv[2]);
+        char * ptr;
+        // check for if value passed is correct or not.
+        strtof(argv[2],&ptr);
+        if(*argv[2] != *ptr) th[0] = atof(argv[2]);
+        else error("wrong arguments");
+
         // with specific output file
         if(argc == 6 ) op_file_n = argv[4];
+        // RUN MODULE
         imageload(ip_file_n,op_file_n,flg,th);
       }
+
       else
       {
         error("wrong usage for threshold! use '-h' to find correct usage");
@@ -70,12 +77,18 @@ int main(int argc, char *argv[]) {
     {
       if(argc == 5)
       {
-        th[0] = atof(argv[2]);
+        // check for if value passed is correct or not.
+        char * ptr;
+        strtof(argv[2],&ptr);
+        if(*argv[2] != *ptr) th[0] = atof(argv[2]);
+        else error("wrong arguments");
       }
       flg = 2;
+      // input file
       ip_file_n = argv[argc - 2];
+      //output file
       op_file_n = argv[argc - 1];
-
+      //Run Module
       imageload(ip_file_n,op_file_n,flg,th);
     }
     // BRIGHTNESS SATURATION HUE MODULE INVOKED
@@ -84,38 +97,35 @@ int main(int argc, char *argv[]) {
       flg = 3;
       if(argc == 6)
       {
+        // without specified output file
         op_file_n = "modified.bmp";
         if(isNumber(argv[2]) && isNumber(argv[3]) && isNumber(argv[4]))
         {
-          //printf("%s\n", "pass");
+          // parsing values for brightness, saturation, hue
           th[0]= atof(argv[2]);
           th[1] = atof(argv[3]);
           th[2] = atof(argv[4]);
         }
         else error("Wrong values passed,use '-h' to find correct usage ");
+        // Run module
         imageload(ip_file_n,op_file_n,flg,th);
       }
-      //printf("threshold: %f\n",th );
       // with specific output file
       else if((argc == 8 && (strcmp(argv[5],"-o") == 0)))
       {
         if(isNumber(argv[2]) && isNumber(argv[3]) && isNumber(argv[4]))
         {
-          //printf("%s\n", "pass");
+          // parsing values for brightness, saturation, hue
           th[0]= atof(argv[2]);
           th[1] = atof(argv[3]);
           th[2] = atof(argv[4]);
         }
         else error("Wrong values passed,use '-h' to find correct usage ");
+        // parsing output file name
         op_file_n = argv[argc - 2];
+        // Run module
         imageload(ip_file_n,op_file_n,flg,th);
 
-      }
-      else if(argc == 4 || argc == 6)
-      {
-        printf("%s\n","im here" );
-        op_file_n = "modified.bmp";
-        imageload(ip_file_n,op_file_n,flg,th);
       }
 
       else
@@ -131,19 +141,17 @@ int main(int argc, char *argv[]) {
       //with specified output file
       if(argc == 5 && (strcmp(argv[2],"-o") == 0))
       {
+        // parse output filename
         op_file_n = argv[argc - 2];
+        // Run module
         imageload(ip_file_n,op_file_n,flg,th);
       }
       //without specified output file
       else if(argc == 3)
       {
+        // default filename
         op_file_n = "greyscale.bmp";
-        imageload(ip_file_n,op_file_n,flg,th);
-      }
-      //without specified output file
-      else if(argc == 3)
-      {
-        op_file_n = "greyscale.bmp";
+        // Run Module
         imageload(ip_file_n,op_file_n,flg,th);
       }
 
@@ -151,6 +159,58 @@ int main(int argc, char *argv[]) {
       {
         error("wrong usage for greyscale! use '-h' to find correct usage");
       }
+
+    }
+    // INVERT MODULE INVOKED
+    else if(strcmp(argv[1],"-i") == 0)
+    {
+      flg = 5;
+      //with specified output file
+      if(argc == 5 && (strcmp(argv[2],"-o") == 0))
+      {
+        // parse output filename
+        op_file_n = argv[argc - 2];
+        // Run Module
+        imageload(ip_file_n,op_file_n,flg,th);
+      }
+      //without specified output file
+      else if(argc == 3)
+      {
+        // default filename
+        op_file_n = "invert.bmp";
+        // Run Module
+        imageload(ip_file_n,op_file_n,flg,th);
+      }
+
+      else
+      {
+        error("wrong usage for invert! use '-h' to find correct usage");
+      }
+
+    }
+    // COLOR FILTER MODULE INVOKED
+    else if(strcmp(argv[1],"-cf") == 0)
+    {
+
+      if(argc == 4 || (argc == 6 && (strcmp(argv[3],"-o") == 0)))
+      {
+        // changing filter wanted into ASCII value
+        unsigned char s;
+        s = (unsigned char)*argv[2];
+        th[0] = (float)s;
+        // without specified output
+        op_file_n = "colorFilter.bmp";
+        flg = 6;
+        // with specific output file
+        if(argc == 6 ) op_file_n = argv[4];
+        // Run Module
+        imageload(ip_file_n,op_file_n,flg,th);
+      }
+      else
+      {
+        error("wrong usage for threshold! use '-h' to find correct usage");
+      }
+
     }
     else
     {
@@ -162,31 +222,38 @@ int main(int argc, char *argv[]) {
     error("INVALID ARGUMENTS, use '-h' for help.");
   }
 
-
-  //printf("%s", file_n );
-
   return 0;
 }
 
 void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5])
 {
-  int source_fd,source_fd2, dest_fd;
+  int source_fd, source_fd2, dest_fd;
+  int padding;
   unsigned char *source_data,*source_data2, *dest_data;
   size_t filesize;
 
-
+  /*
+  *The approach for mapping data of image file
+  *into memory is inspired from
+  *bmpshow.c at https://gitlab.cecs.anu.edu.au/comp2300/lecture-example-code
+  *by Eric McCreath
+  */
   // data for source file
   source_fd = open(ip_filename,O_RDONLY);
   //printf("FD: %d\n",source_fd );
   if (source_fd == -1) error("problem opening file, use '-h' to check correct usage");
   filesize = lseek(source_fd, 0, SEEK_END);
+  //printf("%zu\n",filesize );
   source_data = mmap(NULL,filesize,PROT_READ,MAP_PRIVATE,source_fd,0);
   if(source_data == MAP_FAILED) error("mmap problem");
   // ------------------------------------------------------------------
   // Prints Image Dimensions
   int Width = source_data[18] | (source_data[19]<<8) |(source_data[20]<<16) | (source_data[21]<<24);
   int height = source_data[22] | (source_data[23]<<8) |(source_data[24]<<16) | (source_data[25]<<24);
+  padding = (4 - ((Width * 3) % 4)) % 4;
+
   printf("Image Width: %d\nImage Height: %d \n", Width,height);
+  //printf("pad: %d\n",padding );
   //printf("%f\n",(0.2126*(float)source_data[56] ));
   //printf("%f\n", ((0.2126*(float)source_data[56] + 0.7152*(float)source_data[55] + 0.0722*(float)source_data[54])));
   //printf("%d\n", source_data[57] );
@@ -206,8 +273,22 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     // copy file
     memcpy(dest_data, source_data, filesize);
     // apply threshhold
-    for(int i = 54; i < (3 * height * Width); i += 3 )
+    int last_pixel = (Width * 3) ;
+    //printf("%d\n",(3 * height * Width) +54);
+    for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
+      if(padding > 0)
+      {
+        if(i == last_pixel + 54)
+        {
+          //printf("before i: %d before lastP: %d\n",i,last_pixel );
+          last_pixel = (last_pixel+padding) + (Width * 3);
+          i = i + (padding);
+          //i += (padding*sizeof(unsigned char));
+          //printf("after: %d after lastp: %d\n",i,last_pixel );
+        }
+      }
+
       float pixel = 0;
       pixel =(float)(dest_data[i]+dest_data[i+1]+dest_data[i+2])/(255*3);
       if(pixel > threshold[0])
@@ -240,6 +321,9 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     filesize = lseek(source_fd, 0, SEEK_END);
     source_data2 = mmap(NULL,filesize,PROT_READ,MAP_PRIVATE,source_fd2,0);
     if(source_data2 == MAP_FAILED) error("mmap problem");
+    int Width2 = source_data2[18] | (source_data2[19]<<8) |(source_data2[20]<<16) | (source_data2[21]<<24);
+    int height2 = source_data2[22] | (source_data2[23]<<8) |(source_data2[24]<<16) | (source_data2[25]<<24);
+    if((Width != Width2) || (height != height2)) error("Both images should be of same Width and height");
     //-------
     // data for output image
     dest_fd = open("blendOut.bmp", O_RDWR | O_CREAT, 0666);
@@ -248,10 +332,11 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     // copy file
     memcpy(dest_data, source_data2, filesize);
     // apply blend
-    for(int i = 54; i < (3 * height * Width); i += 3 )
+    for(int i = 54; i < (3 * height * Width); i += 3)
     {
       if(blend_threshold != -1.0)
       {
+
         float pixel = 0;
         //float blend_threshold = 0.5;
         pixel =(float)(source_data[i]+source_data[i+1]+source_data[i+2])/(255*3);
@@ -280,6 +365,12 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
 
 
     }
+    // delete memory map data
+    munmap(source_data2, filesize);
+    munmap(dest_data, filesize);
+    // close files
+    close(dest_fd);
+    close(source_fd2);
 
 
   }
@@ -293,8 +384,26 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
-    for(int i = 54; i < (3 * height * Width); i += 3 )
+    int last_pixel = (Width * 3) ;
+    for(int i = 54; i < (3 * height * Width); i += 3)
     {
+      if(padding > 0)
+      {
+        if(i == last_pixel + 54)
+        {
+          //printf("before i: %d before lastP: %d\n",i,last_pixel );
+          last_pixel = (last_pixel+padding) + (Width * 3);
+          i = i + (padding);
+          //i += (padding*sizeof(unsigned char));
+          //printf("after: %d after lastp: %d\n",i,last_pixel );
+        }
+      }
+      /*
+      *The approach for converting RGB to HSL
+      *and back is inspired from
+      *Opensource Java Implementation at
+      *http://kickjava.com/src/org/eclipse/swt/graphics/RGB.java.htm
+      */
       // CONVERT RGB-> HSB
       float r = source_data[i+2] / 255.0;
       float g = source_data[i+1] / 255.0;
@@ -431,11 +540,15 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
          //printf("r:%d g:%d b:%d\n",source_data[i+2],source_data[i+1],source_data[i] );
 
     }
+    // delete memory map data
+    munmap(dest_data, filesize);
+    // close files
+    close(dest_fd);
 
 
   }
   //-----------------------------------------------------------------------
-  // GREYSCALE MODULE
+  // GRAYSCALE MODULE
   else if(flag == 4)
   {
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
@@ -443,8 +556,22 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
-    for(int i = 54; i < (3 * height * Width); i += 3 )
+    int last_pixel = (Width * 3) ;
+    for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
+
+      if(padding > 0)
+      {
+        if(i == last_pixel + 54)
+        {
+          //printf("before i: %d before lastP: %d\n",i,last_pixel );
+          last_pixel = (last_pixel+padding) + (Width * 3);
+          i = i + (padding);
+          //i += (padding*sizeof(unsigned char));
+          //printf("after: %d after lastp: %d\n",i,last_pixel );
+        }
+      }
+
       float pixel = 0;
       pixel =(dest_data[i]+dest_data[i+1]+dest_data[i+2])/3;
 
@@ -458,6 +585,95 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     close(dest_fd);
 
   }
+  //--------------------------------------------------------------------------
+  // INVERT COLOR MODULE
+  else if(flag == 5)
+  {
+    dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
+    ftruncate(dest_fd, filesize);
+    dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
+    // copy file
+    memcpy(dest_data, source_data, filesize);
+    int last_pixel = (Width * 3) ;
+    for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
+    {
+
+      if(padding > 0)
+      {
+        if(i == last_pixel + 54)
+        {
+          //printf("before i: %d before lastP: %d\n",i,last_pixel );
+          last_pixel = (last_pixel+padding) + (Width * 3);
+          i = i + (padding);
+          //i += (padding*sizeof(unsigned char));
+          //printf("after: %d after lastp: %d\n",i,last_pixel );
+        }
+      }
+
+      dest_data[i] = 255 - source_data[i];
+      dest_data[i+1] = 255 - source_data[i+1];
+      dest_data[i+2] = 255 - source_data[i+2];
+
+    }
+    // delete memory map data
+    munmap(dest_data, filesize);
+    // close files
+    close(dest_fd);
+
+  }
+  //-----------------------------------------------------------------------
+  // COLOR FILTER MODULE
+  else if(flag == 6)
+  {
+    dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
+    ftruncate(dest_fd, filesize);
+    dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
+    // copy file
+    memcpy(dest_data, source_data, filesize);
+    int last_pixel = (Width * 3) ;
+    for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
+    {
+
+      if(padding > 0)
+      {
+        if(i == last_pixel + 54)
+        {
+          //printf("before i: %d before lastP: %d\n",i,last_pixel );
+          last_pixel = (last_pixel+padding) + (Width * 3);
+          i = i + (padding);
+          //i += (padding*sizeof(unsigned char));
+          //printf("after: %d after lastp: %d\n",i,last_pixel );
+        }
+      }
+      if(threshold[0] == 114.0)
+      {
+        dest_data[i] = 0;
+        dest_data[i+1] = 0;
+        dest_data[i+2] = source_data[i+2];
+      }
+      else if(threshold[0] == 103.0)
+      {
+        dest_data[i] = 0;
+        dest_data[i+1] = source_data[i+1];
+        dest_data[i+2] = 0;
+      }
+      else if(threshold[0] == 98.0)
+      {
+        dest_data[i] = source_data[i];
+        dest_data[i+1] = 0;
+        dest_data[i+2] = 0;
+      }
+      else error("wrong filter value passed, use '-h' to find correct usage" );
+
+
+    }
+    // delete memory map data
+    munmap(dest_data, filesize);
+    // close files
+    close(dest_fd);
+
+  }
+  //---------------------------------------------------------------------------
 // delete memory map data
   munmap(source_data, filesize);
   //munmap(dest_data, filesize);
@@ -475,10 +691,12 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     file = fopen("help.txt", "r");
     if (file)
     {
+        c = getc(file);
         while (!feof(file))
         {
-          c = getc(file);
           putchar(c);
+          c = getc(file);
+
         }
         fclose(file);
     }

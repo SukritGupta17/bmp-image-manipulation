@@ -24,7 +24,8 @@ OPTIONS:
 			three values are passed after the flag ranging from 0-100, each corresponding
 			to Brightness, saturation and hue respectively. if a 0 is passed no change is
 			made to that part.
-			-Usage: bmpedit -bsh <value for brightness> <value for saturation> <value for hue> -o output_file_name.bmp input_file_name
+			-Usage: bmpedit -bsh <value for brightness> <value for saturation> <value for hue> -o output
+			_file_name.bmp input_file_name
 			If "-o" flag not used, default file "modified.bmp" is used.
 
 	-g		Used to convert image to grayscale.
