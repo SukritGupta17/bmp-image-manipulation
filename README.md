@@ -19,7 +19,7 @@
      Image Width: 640
      Image Height: 480
     ```
-    The above output is achieved by mapping the data of the image using the mmap function present in the
+    The above output is achieved by maping the data of the image using the mmap function present in the
     `#include <sys/mman.h>` library. The below mentioned way makes a private map of the data of the input file.
     Its loaded only for the purpose of reading the file`MAP_PRIVATE` & `PROT_READ`(arguments passed for this purpose), so     as to keep the original image intact.[1]
 
@@ -50,7 +50,7 @@
     ```c
     mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0)
     ```
-    The pixels of the image are stored in a pixel array that starts immediately after the DIB header i.e. 14 + 40 bytes is     the offset to access the pixel array. A single Pixel is made up of RGB which each individually takes 1 byte of space      and their value ranges from 0-255. In the pixel array every three bytes make up a pixel, the first byte corresponds      to the value of 'B', the second to 'G' and third to 'R'.  To convert the pixel color from an integer between 0 and        2^((bits per pixel/3) - 1, to a floating point number between 0 and 1, to make the pixel comparable to the threshold      value passed by the user, the following math formula was used :
+    The pixels of the image are stored in a pixel array that starts immediately after the DIB header i.e. 14 + 40 bytes is     the offset to access the pixel array. A single Pixel is made up of RGB which each individually takes 1 byte of space      and their value ranges from 0-255. In the pixel array every three bytes make up a pixel, the first byte correspondes      to the value of 'B', the second to 'G' and third to 'R'.  To convert the pixel color from an integer between 0 and        2^((bits per pixel/3) - 1, to a floating point number between 0 and 1, to make the pixel comparable to the threshold      value passed by the user, the following math formula was used :
     ` (float)(adding the three bytes of a pixel) / (255*3)`
     this gave a value that can be compared with threshold value passed and each pixel is manipulated accordingly, pixel       higher than threshold value is turned white and pixel lower than threshold value is turned black.
     ##### Sample output:
@@ -87,10 +87,10 @@
     $ ./bmpedit -bsh -10 30 5 input_filename.bmp
     ```
     When the  "-bsh" flag is encountered, the brightness, saturation, hue module is invoked in the code. The three values     passed after the flag correspond to b for brightness, s for saturation and h for hue, respectively. These values are     from 0 - 100 and represent increase in original values to be made. The value for brightness and saturation is in         percentage and the value for hue is in degrees.[3]
-    The mechanism used to achieve this feature was to covert the RGB values for every pixel into the HSL values i.e. Hue     Saturation and Luminance. The math formula to do the conversions to HSL and back to RGB and coding it into c was          achieved by taking help from various resources available on the internet like wikipedia[4], stackoverflow[5],            kickjava[6], niwa[7].
+    The mechanism used to achieve this feature was to covert the RGB values for every pixel into the HSL values i.e. Hue     Saturation and Luminence. The math formula to do the coversions to HSL and back to RGB and coding it into c was          achieved by taking help from various resources available on the internet like wikipedia[4], stackoverflow[5],            kickjava[6], niwa[7].
     If a '-o' flag is encountered in the command line arguments the file name next to it is used for the output file,
     otherwise a default file name "modified.bmp" is used for the output image.
-    The arguments for brightness, saturation and hue work together and individually if the argument value passed is 0 no     changes are made for that part. You can increase and decrease the values accordingly.
+    The argements for brightness, saturation and hue work together and individually if the argument value passed is 0 no     changes are made for that part. You can increase and decrease the values accordingly.
     The first example code increases the brightness by 23%, the saturation by 5% and no change is made for hue.
     In the second example brightness is decreased by 10% saturation increased by 30% and hue is moved 5 degrees.
     It also prints out the old values of brightness, saturation and hue and the new values after the process is done for     one pixel in the image to provide the user with information of the modifications made to the values of the image.
@@ -111,6 +111,22 @@
 
     ##### Sample output:
 
+* #### Invert Color Filter
+    The following command invokes the invert color module on the input image.
+    ```sh
+    $ ./bmpedit -i -o output_filename.bmp input_filename.bmp
+    ```
+    **OR**
+
+    ```sh
+    $ ./bmpedit -i input_filename.bmp
+    ```
+    The "-i" flag applies the Invert color filter on the input image. it takes the input image provided in the        command line argument and maps the image data using the MMAP function as described above. The math to manipulate the     pixels into inverting the colors is simple, you just need the opposite color of the current color value. To achieve     this you set the pixels of the output image to the corresponding pixel RGB values subtracting 255 from them           individualy. ```
+            output_image_pixel[R] = 255 - input_image[R];
+            output_image_pixel[G] = 255 - input_image[G];
+            output_image_pixel[B] = 255 - input_image[B];
+            ```
+    ##### Sample output:
 * #### Help Module
     The following command invokes the help for the bmpedit program:
     ```sh
@@ -141,6 +157,8 @@ To make the program robust: tested it with various wrong arguments i.e. passing 
 - Image Blend :
     - The usage explained above
     - can be used to blend 2 images together
+- Invert Color Filter:
+    - Inverts the colors of any 24bit *.bmp image.
 ## Limitations and Future Improvements:
 
 - Parsing command line arguments in a different order aren't handled.
@@ -148,7 +166,7 @@ To make the program robust: tested it with various wrong arguments i.e. passing 
 - Any other *.bmp file that isn't 24bit BMP is not handled by the program.
     - be able to handle header formats of other BMP type images.
 - Only a default output image for the blend module and can only handle two images of same dimensions.
-    - add the '-o' flag to this module to be able to receive output file names from the user.
+    - add the '-o' flag to this module to be able to recieve output file names from the user.
     - be able to blend two images with varying sizes and dimensions.
 - Add other useful extensions like:
     - Cropping images
@@ -168,3 +186,15 @@ McCreath
 - [6] Opensource Java Implementation: http://kickjava.com/src/org/eclipse/swt/graphics/RGB.java.htm
 - [7] Math formulas for conversion: http://www.niwa.nu/2013/05/math-behind-colorspace-conversions-rgb-hsl/
 - [8] GrayScale : https://en.wikipedia.org/wiki/Luma_%28video%29 , https://en.wikipedia.org/wiki/Grayscale
+
+
+
+
+
+
+
+
+
+
+
+    
