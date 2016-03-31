@@ -187,6 +187,7 @@
     ```sh
     $ gcc -std=c99 -o bmpedit bmpedit.c
     ```
+
 ## Testing done :
 
 Each module was tested with different 24 bit .bmp images, various bugs were removed, many of the images used for testing are included in repository. Usage of printf statements at various places to check if the modules were being invoked aptly. printing out the image header to find the information required. printing out the image data bytes for the pixel array to check if the loops to manipulate pixels were going to the end of the file.
