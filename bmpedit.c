@@ -1,3 +1,9 @@
+/**
+* @author: Sukrit Gupta
+* ANU ID: u5900600
+* Program Purpose: BMP Image processing and manipulation
+*
+*/
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -240,57 +246,51 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
   */
   // data for source file
   source_fd = open(ip_filename,O_RDONLY);
-  //printf("FD: %d\n",source_fd );
   if (source_fd == -1) error("problem opening file, use '-h' to check correct usage");
+
   filesize = lseek(source_fd, 0, SEEK_END);
-  //printf("%zu\n",filesize );
+
   source_data = mmap(NULL,filesize,PROT_READ,MAP_PRIVATE,source_fd,0);
   if(source_data == MAP_FAILED) error("mmap problem");
+
   // ------------------------------------------------------------------
-  // Prints Image Dimensions
+  // converts image dimensions from binary to decimal
   int Width = source_data[18] | (source_data[19]<<8) |(source_data[20]<<16) | (source_data[21]<<24);
   int height = source_data[22] | (source_data[23]<<8) |(source_data[24]<<16) | (source_data[25]<<24);
+  // Calculate padding
   padding = (4 - ((Width * 3) % 4)) % 4;
-
+  // Prints Image Dimensions
   printf("Image Width: %d\nImage Height: %d \n", Width,height);
-  //printf("pad: %d\n",padding );
-  //printf("%f\n",(0.2126*(float)source_data[56] ));
-  //printf("%f\n", ((0.2126*(float)source_data[56] + 0.7152*(float)source_data[55] + 0.0722*(float)source_data[54])));
-  //printf("%d\n", source_data[57] );
   //-------------------------------------------------------------------
-
- //-------------------------------------------------------------------------
+// Start of Feature Modules
+  //-------------------------------------------------------------------------
  // THRESHOLD MODULE
   if(flag == 1)
   {
-
-    //float threshold = 0.5;/printf("%s\n %3s\n","DESCRIPTION:","This program does simple input" );
-    //printf("%f\n",threshold[0]);
     // data for destination file
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
-    // apply threshhold
+    // find the last pixel in the row of pixels
     int last_pixel = (Width * 3) ;
-    //printf("%d\n",(3 * height * Width) +54);
+    // apply threshhold
     for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
+      // Check for padding and do the relative byte skipping
       if(padding > 0)
       {
         if(i == last_pixel + 54)
         {
-          //printf("before i: %d before lastP: %d\n",i,last_pixel );
           last_pixel = (last_pixel+padding) + (Width * 3);
           i = i + (padding);
-          //i += (padding*sizeof(unsigned char));
-          //printf("after: %d after lastp: %d\n",i,last_pixel );
         }
       }
-
+      // Convert pixel value into float (0.0 - 1.0)
       float pixel = 0;
       pixel =(float)(dest_data[i]+dest_data[i+1]+dest_data[i+2])/(255*3);
+      // Test with threshold value and change image pixels accordingly
       if(pixel > threshold[0])
       {
         dest_data[i] = 255;
@@ -316,13 +316,17 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     float blend_threshold = threshold[0];
     // data for second image
     source_fd2 = open(op_filename,O_RDONLY);
-    //printf("FD: %d\n",source_fd2 );
     if (source_fd2 == -1) error("problem opening file, use '-h' to check correct usage");
+
     filesize = lseek(source_fd, 0, SEEK_END);
+
     source_data2 = mmap(NULL,filesize,PROT_READ,MAP_PRIVATE,source_fd2,0);
     if(source_data2 == MAP_FAILED) error("mmap problem");
+
     int Width2 = source_data2[18] | (source_data2[19]<<8) |(source_data2[20]<<16) | (source_data2[21]<<24);
     int height2 = source_data2[22] | (source_data2[23]<<8) |(source_data2[24]<<16) | (source_data2[25]<<24);
+
+    // Check if both images are of same dimensions.
     if((Width != Width2) || (height != height2)) error("Both images should be of same Width and height");
     //-------
     // data for output image
@@ -334,13 +338,11 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     // apply blend
     for(int i = 54; i < (3 * height * Width); i += 3)
     {
+      // check if value for blend passed
       if(blend_threshold != -1.0)
       {
-
         float pixel = 0;
-        //float blend_threshold = 0.5;
         pixel =(float)(source_data[i]+source_data[i+1]+source_data[i+2])/(255*3);
-        //pixel2 =(float)(source_data2[i]+source_data2[i+1]+source_data2[i+2])/(255*3);
 
         if(pixel > blend_threshold)
         {
@@ -355,14 +357,13 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
           dest_data[i+2] = source_data2[i+2];
         }
       }
+      // blend images evenly
       else
       {
         dest_data[i] = (source_data[i] + source_data2[i]) / 2;
         dest_data[i+1] = (source_data[i+1] + source_data2[i+1]) / 2;
         dest_data[i+2] = (source_data[i+2] + source_data2[i+2]) / 2;
       }
-
-
 
     }
     // delete memory map data
@@ -371,31 +372,28 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     // close files
     close(dest_fd);
     close(source_fd2);
-
-
   }
   //----------------------------------------------------------------------
   // BRIGHTNESS SATURATION HUE MODULE
   else if(flag == 3)
   {
-
+    // data for output image
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
+    // find the last pixel in the row of pixels
     int last_pixel = (Width * 3) ;
     for(int i = 54; i < (3 * height * Width); i += 3)
     {
+      // Check for padding and skipping bytes accordingly
       if(padding > 0)
       {
         if(i == last_pixel + 54)
         {
-          //printf("before i: %d before lastP: %d\n",i,last_pixel );
           last_pixel = (last_pixel+padding) + (Width * 3);
           i = i + (padding);
-          //i += (padding*sizeof(unsigned char));
-          //printf("after: %d after lastp: %d\n",i,last_pixel );
         }
       }
       /*
@@ -408,15 +406,11 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
       float r = source_data[i+2] / 255.0;
       float g = source_data[i+1] / 255.0;
       float b = source_data[i] / 255.0;
-    //   if(i == 54)
-    //   {
-    //     printf("r:%d g:%d b:%d\n",source_data[i+2],source_data[i+1],source_data[i] );
-    //     printf("r:%f g:%f b:%f\n",r,g,b );
-    //  }
-      float max = MAX(MAX(r, g), b);
 
+      float max = MAX(MAX(r, g), b);
       float min = MIN(MIN(r, g), b);
       float delta = max - min;
+
       float hue = 0;
       float brightness = max;
       float saturation = max == 0 ? 0 : (max - min) / max;
@@ -435,12 +429,12 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
        }
        if(i == 54)
        {
+         // print out original values of brightness, saturation, hue for one pixel
          printf("Old values:\nhue:%.1f deg saturation:%.0f%% brightness:%.0f%%\n",hue,(saturation*100),(brightness*100) );
-
        }
 
        brightness = brightness + (threshold[0]/100);
-
+       // check to make sure value doesn't overflow or underflow
        if(brightness>1.0)
        {
          brightness = 1.0;
@@ -452,6 +446,7 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
 
 
        saturation = saturation + (threshold[1]/100);
+       // check to make sure value doesn't overflow or underflow
        if(saturation>1.0)
        {
          saturation = 1.0;
@@ -463,6 +458,7 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
 
 
        hue = hue + threshold[2];
+       // check to make sure value doesn't overflow or underflow
        if(hue>360)
        {
          hue = 360;
@@ -472,21 +468,22 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
          hue = 0;
        }
 
-
-
-
-       //printf("new B:%f\n",brightness );
-
     //-------------------------------------------------------------------
     // CONVERT HSB -> RGB
       if (hue < 0 || hue > 360 || saturation < 0 || saturation > 1 ||
-             brightness < 0 || brightness > 1) {
-             error("ERROR_INVALID_ARGUMENT");
-         }
+             brightness < 0 || brightness > 1)
+      {
+          error("ERROR_INVALID_ARGUMENT");
+      }
       float re, gr, bl;
-      if (saturation == 0) {
+
+      if (saturation == 0)
+      {
           re = gr = bl = brightness;
-      } else {
+      }
+
+      else
+      {
           if (hue == 360) hue = 0;
           //hue /= 60;
           int i = (int)(hue/60);
@@ -528,53 +525,52 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
                  break;
           }
         }
+
         if(i == 54)
         {
+          // Print the modified values for the same pixel
           printf("New Values:\nhue:%.1f deg saturation:%.0f%% brightness:%.0f%%\n",hue,(saturation*100),(brightness*100) );
         }
 
-
+        // writing new RGB values into the output file
          dest_data[i+2] = (int)(re * 255 + 0.5);
          dest_data[i+1] = (int)(gr * 255 + 0.5);
          dest_data[i] = (int)(bl * 255 + 0.5);
-         //printf("r:%d g:%d b:%d\n",source_data[i+2],source_data[i+1],source_data[i] );
 
     }
     // delete memory map data
     munmap(dest_data, filesize);
     // close files
     close(dest_fd);
-
-
   }
   //-----------------------------------------------------------------------
   // GRAYSCALE MODULE
   else if(flag == 4)
   {
+    // data for output image
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
+    // find the last pixel in the row of pixels
     int last_pixel = (Width * 3) ;
     for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
-
+      // Check for padding and skipping bytes accordingly
       if(padding > 0)
       {
         if(i == last_pixel + 54)
         {
-          //printf("before i: %d before lastP: %d\n",i,last_pixel );
           last_pixel = (last_pixel+padding) + (Width * 3);
           i = i + (padding);
-          //i += (padding*sizeof(unsigned char));
-          //printf("after: %d after lastp: %d\n",i,last_pixel );
         }
       }
 
       float pixel = 0;
       pixel =(dest_data[i]+dest_data[i+1]+dest_data[i+2])/3;
 
+      // making output image grayscale
       dest_data[i] = pixel;
       dest_data[i+1] = pixel;
       dest_data[i+2] = pixel;
@@ -589,27 +585,27 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
   // INVERT COLOR MODULE
   else if(flag == 5)
   {
+    // data for output image
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
     // copy file
     memcpy(dest_data, source_data, filesize);
+    // find the last pixel in the row of pixels
     int last_pixel = (Width * 3) ;
     for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
-
+      // check for padding and skipping bytes accordingly
       if(padding > 0)
       {
         if(i == last_pixel + 54)
         {
-          //printf("before i: %d before lastP: %d\n",i,last_pixel );
           last_pixel = (last_pixel+padding) + (Width * 3);
           i = i + (padding);
-          //i += (padding*sizeof(unsigned char));
-          //printf("after: %d after lastp: %d\n",i,last_pixel );
         }
       }
 
+      // inverting color and writing data into output file
       dest_data[i] = 255 - source_data[i];
       dest_data[i+1] = 255 - source_data[i+1];
       dest_data[i+2] = 255 - source_data[i+2];
@@ -625,6 +621,7 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
   // COLOR FILTER MODULE
   else if(flag == 6)
   {
+    // data for output image
     dest_fd = open(op_filename, O_RDWR | O_CREAT, 0666);
     ftruncate(dest_fd, filesize);
     dest_data = mmap(NULL, filesize, PROT_READ | PROT_WRITE, MAP_SHARED, dest_fd, 0);
@@ -633,30 +630,30 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     int last_pixel = (Width * 3) ;
     for(int i = 54; i < (3 * height * Width) + (padding * height); i += 3)
     {
-
+      // check for padding and skipping bytes accordingly
       if(padding > 0)
       {
         if(i == last_pixel + 54)
         {
-          //printf("before i: %d before lastP: %d\n",i,last_pixel );
           last_pixel = (last_pixel+padding) + (Width * 3);
           i = i + (padding);
-          //i += (padding*sizeof(unsigned char));
-          //printf("after: %d after lastp: %d\n",i,last_pixel );
         }
       }
+      // check for red filter
       if(threshold[0] == 114.0)
       {
         dest_data[i] = 0;
         dest_data[i+1] = 0;
         dest_data[i+2] = source_data[i+2];
       }
+      // check for green filter
       else if(threshold[0] == 103.0)
       {
         dest_data[i] = 0;
         dest_data[i+1] = source_data[i+1];
         dest_data[i+2] = 0;
       }
+      // check for blue filter
       else if(threshold[0] == 98.0)
       {
         dest_data[i] = source_data[i];
@@ -673,10 +670,11 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
     close(dest_fd);
 
   }
+  // features end
   //---------------------------------------------------------------------------
+
 // delete memory map data
   munmap(source_data, filesize);
-  //munmap(dest_data, filesize);
 // close files
   close(source_fd);
  }
@@ -710,7 +708,7 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
      exit(1);
   }
   /*
-  * argument check module starts here
+  * argument check module for "-bsh" flag
   */
   bool isNumber(char number[])
   {
@@ -729,3 +727,4 @@ void imageload(char *ip_filename, char *op_filename, int flag, float threshold[5
   }
 
  /* ----------------------------------------------------------------------*/
+ // Program End
