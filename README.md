@@ -36,6 +36,7 @@
     ```
     The above code line was used to extract the data stores in those bytes and convert them back to "Decimal Number           System" base 10.[1]
 
+
 * #### Threshold Filter :
     When the following command is executed :
     ```sh
@@ -55,8 +56,10 @@
     this gave a value that can be compared with threshold value passed and each pixel is manipulated accordingly, pixel       higher than threshold value is turned white and pixel lower than threshold value is turned black.
     ##### Sample output:
     ![threshold output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/threshold.png)
+    
     ##### Sample output for images with padding:
     ![threshold padding output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/thr_pad.png)
+
 
 * #### Picture Blend Feature
     When the following command is executed :
@@ -74,6 +77,7 @@
     If no blend coefficient is passed both the images are blended in 50 - 50. This process is carried out by averaging       the pixels from both the images and using that average as the value for the output image file pixel `out_pixel =         (ip1_pixel + ip2_pixel) / 2;`. This technique results in a evenly blended image. The output image file name is fixed     to "BlendOut.bmp".
      ##### Sample output:
     ![Blend Output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/blend.png)
+
 
 
 * #### Adjusting "Brightness" "Saturation" "Hue"
@@ -112,6 +116,7 @@
 
     ##### Sample output:
     ![grayscale output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/grayscale.png)
+
 * #### Invert Color Filter
     The following command invokes the invert color module on the input image.
     ```sh
@@ -162,8 +167,9 @@
     ```
     The "-cf" flag invokes the color filter module and the filter wanted to be applied is taken as the next argument.
     "r" for red, "g" for green and "b" for blue. The filter is applied using a simple formula, the filter passed by the      user say "b", the value of the B byte in the RGB pixel is kept unchanged and the other bytes are striped of their        values, so as to see only one color component.
-     ##### Sample output:
-     ![colorfilter output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/cab93c87ac74000e3cee17ab4a66f8fab632bd27/colorfilter.png)
+    ##### Sample output:
+    ![colorfilter output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/cab93c87ac74000e3cee17ab4a66f8fab632bd27/colorfilter.png)
+
 
 * #### Help Module
     The following command invokes the help for the bmpedit program:
