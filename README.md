@@ -180,10 +180,13 @@
 
 ## Way to Compile :
 * __For latest version of GCC__
+    
     ```sh
     $ gcc -Wall -o bmpedit bmpedit.c
     ```
+
 * __For older versions of GCC__
+    
     ```sh
     $ gcc -std=c99 -o bmpedit bmpedit.c
     ```
