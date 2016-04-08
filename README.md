@@ -74,7 +74,7 @@
     The picture blend feature is invoked when the "-b" flag is encountered in the command line execution of the program.
     It takes two images as input and a blend coefficient(0.0 - 1.0) (if provided). The images are loaded using the same      MMAP function and the image dimensions of both the images are checked to see if they are equal. The Image Blend only     works for images of same dimensions and throws an error if they are not (Limitation).
     If the blend coefficient is passed, the process used for blending is to take the input image2 as the background image     and the input image1 is blended on top of it depending on the amount of blend coefficient passed. This is done by        converting the value of a pixel into a floating point between 0.0 - 1.0 and compared with the blend coefficient.
-    If no blend coefficient is passed both the images are blended in 50 - 50. This process is carried out by averaging       the pixels from both the images and using that average as the value for the output image file pixel `out_pixel =         (ip1_pixel + ip2_pixel) / 2;`. This technique results in a evenly blended image. The output image file name is fixed     to "BlendOut.bmp".
+    If no blend coefficient is passed both the images are blended in 50 - 50. This process is carried out by averaging       the pixels from both the images and using that average as the value for the output image file pixel `out_pixel = (ip1_pixel + ip2_pixel) / 2;`. This technique results in a evenly blended image. The output image file name is fixed     to "BlendOut.bmp".
      ##### Sample output:
     ![Blend Output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/bfb18a95168e6c27136ba61ee4bfa5f496a07b77/blend.png)
 
@@ -127,11 +127,12 @@
     ```sh
     $ ./bmpedit -i input_filename.bmp
     ```
-    The "-i" flag applies the Invert color filter on the input image. it takes the input image provided in the        command line argument and maps the image data using the MMAP function as described above. The math to manipulate the     pixels into inverting the colors is simple, you just need the opposite color of the current color value. To achieve     this you set the pixels of the output image to the corresponding pixel RGB values subtracting 255 from them           individualy. ```
-            output_image_pixel[R] = 255 - input_image[R];
-            output_image_pixel[G] = 255 - input_image[G];
-            output_image_pixel[B] = 255 - input_image[B];
-            ```
+    The "-i" flag applies the Invert color filter on the input image. it takes the input image provided in the command line argument and maps the image data using the MMAP function as described above. The math to manipulate the pixels into inverting the colors is simple, you just need the opposite color of the current color value. To achieve this you set the pixels of the output image to the corresponding pixel RGB values subtracting 255 from them individualy.
+    ```c
+    output_image_pixel[R] = 255 - input_image[R];
+    output_image_pixel[G] = 255 - input_image[G];
+    output_image_pixel[B] = 255 - input_image[B];
+    ```
     ##### Sample output:
     ![inverted image output](https://gitlab.cecs.anu.edu.au/u5900600/images/raw/a4f6ea996da03829de58beb7ec93205ab21a376a/invert.png)
 
