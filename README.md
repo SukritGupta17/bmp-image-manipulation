@@ -1,4 +1,4 @@
-# Assignnment 1 (Image Processing)
+# Assignment 1 (Image Processing)
 
 * **Name** : Sukrit Gupta
 * **Uni ID** : u5900600
